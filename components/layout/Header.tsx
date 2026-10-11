@@ -1,6 +1,6 @@
 "use client";
 
-import { currentUser } from "@/lib/dashboard-data";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { usePathname } from "next/navigation";
 
 type HeaderProps = {
@@ -9,12 +9,13 @@ type HeaderProps = {
 
 export function Header({ onOpenMenu }: HeaderProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const getPageTitle = () => {
     switch (pathname) {
       case "/":
         return {
-          title: "Good evening, Tilak 👋",
+          title: user ? `Good evening, ${user.user_metadata.full_name?.split(' ')[0] || 'Student'} 👋` : "Good evening 👋",
           subtitle: "Ready to make progress today?",
         };
       case "/subjects":
@@ -103,10 +104,10 @@ export function Header({ onOpenMenu }: HeaderProps) {
           aria-label="Open profile"
         >
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/40 to-violet-500/40 text-[11px] font-semibold text-white">
-            {currentUser.initials}
+            {user ? user.user_metadata.full_name?.charAt(0).toUpperCase() || 'U' : 'G'}
           </span>
           <span className="hidden text-sm font-medium text-zinc-200 sm:inline">
-            {currentUser.name.split(" ")[0]}
+            {user ? user.user_metadata.full_name?.split(' ')[0] || 'User' : 'Guest'}
           </span>
         </button>
       </div>

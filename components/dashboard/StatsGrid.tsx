@@ -1,7 +1,65 @@
-import { Card } from "@/components/ui/Card";
-import { stats } from "@/lib/dashboard-data";
+/* eslint-disable react-hooks/set-state-in-effect */
+"use client"
+
+import { useEffect, useState } from 'react'
+import { Card } from "@/components/ui/Card"
+import { createClient } from '@/lib/supabase/client'
 
 export function StatsGrid() {
+  const [subjectCount, setSubjectCount] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
+
+  useEffect(() => {
+    async function fetchStats() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { count } = await supabase
+        .from('subjects')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSubjectCount(count || 0)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoading(false)
+    }
+
+    fetchStats()
+  }, [supabase])
+
+  const stats = [
+    {
+      id: "streak",
+      icon: "�",
+      label: "Current Streak",
+      value: "0 days",
+      hint: "Keep it going",
+    },
+    {
+      id: "focus",
+      icon: "⏱",
+      label: "Focus Time",
+      value: "0h 0m",
+      hint: "Today",
+    },
+    {
+      id: "subjects",
+      icon: "📚",
+      label: "Subjects",
+      value: loading ? "..." : subjectCount.toString(),
+      hint: "Total subjects",
+    },
+    {
+      id: "goal",
+      icon: "🎯",
+      label: "Weekly Goal",
+      value: "0%",
+      hint: "Start tracking",
+    },
+  ]
+
   return (
     <section aria-labelledby="stats-heading">
       <h2 id="stats-heading" className="sr-only">
@@ -28,5 +86,5 @@ export function StatsGrid() {
         ))}
       </div>
     </section>
-  );
+  )
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { currentUser, mainNav, settingsNav } from "@/lib/dashboard-data";
+import { usePathname, useRouter } from "next/navigation";
+import { mainNav, settingsNav } from "@/lib/dashboard-data";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 type SidebarProps = {
   collapsed: boolean;
@@ -51,6 +52,8 @@ export function Sidebar({
   onNavigate,
 }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="flex h-full flex-col">
@@ -101,27 +104,52 @@ export function Sidebar({
           onNavigate={onNavigate}
         />
 
-        <div
-          className={`flex items-center gap-3 rounded-xl px-2 py-2 ${
-            collapsed ? "justify-center" : ""
-          }`}
-        >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/30 to-violet-500/30 text-xs font-semibold text-zinc-100 ring-1 ring-white/10">
-            {currentUser.initials}
-          </div>
-          {!collapsed ? (
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-zinc-100">
-                {currentUser.name}
-              </p>
-              <p className="truncate text-xs text-zinc-500">{currentUser.role}</p>
+        {user ? (
+          <>
+            <div
+              className={`flex items-center gap-3 rounded-xl px-2 py-2 ${
+                collapsed ? "justify-center" : ""
+              }`}
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/30 to-violet-500/30 text-xs font-semibold text-zinc-100 ring-1 ring-white/10">
+                {user.user_metadata.full_name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              {!collapsed ? (
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-zinc-100">
+                    {user.user_metadata.full_name || 'User'}
+                  </p>
+                  <p className="truncate text-xs text-zinc-500">Student</p>
+                </div>
+              ) : (
+                <span className="sr-only">
+                  {user.user_metadata.full_name || 'User'}, Student
+                </span>
+              )}
             </div>
-          ) : (
-            <span className="sr-only">
-              {currentUser.name}, {currentUser.role}
-            </span>
-          )}
-        </div>
+
+            <button
+              type="button"
+              onClick={async () => {
+                await signOut();
+                router.push('/auth/signin');
+                router.refresh();
+              }}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-100"
+            >
+              <span className="text-base" aria-hidden="true">🚪</span>
+              <span className={collapsed ? "sr-only" : "truncate"}>Sign Out</span>
+            </button>
+          </>
+        ) : (
+          <Link
+            href="/auth/signin"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-100"
+          >
+            <span className="text-base" aria-hidden="true">🔐</span>
+            <span className={collapsed ? "sr-only" : "truncate"}>Sign In</span>
+          </Link>
+        )}
 
         <button
           type="button"

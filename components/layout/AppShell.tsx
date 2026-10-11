@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 type AppShellProps = {
   children: ReactNode;
@@ -88,7 +89,7 @@ export function AppShell({ children }: AppShellProps) {
       <div className={`flex min-h-dvh min-w-0 flex-col ${contentOffset}`}>
         <Header onOpenMenu={() => setMobileOpen(true)} />
         <main id="main-content" className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          {children}
+          <AuthGuard>{children}</AuthGuard>
         </main>
       </div>
     </div>
