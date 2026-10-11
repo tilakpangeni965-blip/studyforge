@@ -31,7 +31,10 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
+# `.env*` also matches `.env.example`, which must stay tracked so the required
+# variable names are documented for Vercel. Real secrets stay ignored.
 .env*
+!.env.example
 
 # vercel
 .vercel
