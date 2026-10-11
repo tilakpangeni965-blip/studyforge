@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ToastProvider } from "@/components/ui/Toast";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "StudyForge",
+  title: {
+    default: "StudyForge",
+    template: "%s · StudyForge",
+  },
   description: "An AI-powered study workspace for students.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b0b0f",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -23,8 +32,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#0b0b0f] font-sans text-zinc-100">
-        {children}
+      <body className="min-h-full bg-canvas font-sans text-ink">
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );

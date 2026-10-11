@@ -1,28 +1,130 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Design tokens — the single source of truth for colour, elevation and motion.
+   Components reference these through Tailwind utilities (bg-surface, text-ink,
+   border-hairline, shadow-card, …) instead of hardcoding hex values.
+   --------------------------------------------------------------------------- */
+
 :root {
-  --background: #0b0b0f;
-  --foreground: #f4f4f5;
+  color-scheme: dark;
+
+  /* Surfaces, from furthest back to closest to the reader */
+  --sf-canvas: #0b0b0f;
+  --sf-surface: #121217;
+  --sf-surface-raised: #17171e;
+  --sf-surface-hover: #1e1e27;
+  --sf-overlay: rgba(8, 8, 11, 0.72);
+
+  /* Hairlines. Low-contrast by design; strong is for focused/active edges. */
+  --sf-hairline: rgba(255, 255, 255, 0.08);
+  --sf-hairline-strong: rgba(255, 255, 255, 0.16);
+
+  /* Type colours. All three pass contrast checks on --sf-canvas. */
+  --sf-ink: #f4f4f5;
+  --sf-ink-muted: #a3a3ad;
+  --sf-ink-subtle: #7c7c88;
+
+  /* Brand accent. One family, used sparingly. */
+  --sf-accent: #6366f1;
+  --sf-accent-hover: #818cf8;
+  --sf-accent-violet: #8b5cf6;
+  --sf-accent-soft: rgba(99, 102, 241, 0.14);
+  --sf-accent-contrast: #ffffff;
+
+  /* Status */
+  --sf-success: #34d399;
+  --sf-success-soft: rgba(52, 211, 153, 0.12);
+  --sf-warning: #fbbf24;
+  --sf-warning-soft: rgba(251, 191, 36, 0.12);
+  --sf-danger: #f87171;
+  --sf-danger-soft: rgba(248, 113, 113, 0.12);
+
+  /* Elevation — two steps only, so surfaces stay flat and calm. */
+  --sf-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --sf-shadow-pop: 0 18px 45px rgba(0, 0, 0, 0.5);
+
+  /* Motion */
+  --sf-duration-fast: 120ms;
+  --sf-duration: 180ms;
+  --sf-ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Expose the tokens as Tailwind utilities: bg-surface, text-ink-muted, … */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-canvas: var(--sf-canvas);
+  --color-surface: var(--sf-surface);
+  --color-surface-raised: var(--sf-surface-raised);
+  --color-surface-hover: var(--sf-surface-hover);
+  --color-overlay: var(--sf-overlay);
+
+  --color-hairline: var(--sf-hairline);
+  --color-hairline-strong: var(--sf-hairline-strong);
+
+  --color-ink: var(--sf-ink);
+  --color-ink-muted: var(--sf-ink-muted);
+  --color-ink-subtle: var(--sf-ink-subtle);
+
+  --color-accent: var(--sf-accent);
+  --color-accent-hover: var(--sf-accent-hover);
+  --color-accent-violet: var(--sf-accent-violet);
+  --color-accent-soft: var(--sf-accent-soft);
+  --color-accent-contrast: var(--sf-accent-contrast);
+
+  --color-success: var(--sf-success);
+  --color-success-soft: var(--sf-success-soft);
+  --color-warning: var(--sf-warning);
+  --color-warning-soft: var(--sf-warning-soft);
+  --color-danger: var(--sf-danger);
+  --color-danger-soft: var(--sf-danger-soft);
+
+  --shadow-card: var(--sf-shadow-card);
+  --shadow-pop: var(--sf-shadow-pop);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+
 html,
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--sf-canvas);
+  color: var(--sf-ink);
 }
 
 body {
   min-height: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--sf-accent-soft);
+  color: var(--sf-ink);
+}
+
+/* Keyboard focus must always be visible, even on elements that set
+   outline-none for pointer interactions. */
+:focus-visible {
+  outline: 2px solid var(--sf-accent-hover);
+  outline-offset: 2px;
 }
 
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+/* Honor the OS setting rather than animating for everyone. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
