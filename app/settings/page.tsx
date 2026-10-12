@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
-import Link from "next/link";
+import { useState, type FormEvent } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { Button, buttonVariants } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Field, Input } from "@/components/ui/Input";
 import { OtherPreferences } from "@/components/settings/OtherPreferences";
-import { getTutorConfiguration } from "@/app/tutor/actions";
 import { changeAccountEmail, changeAccountPassword } from "@/app/settings/security-actions";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { createClient } from "@/lib/supabase/client";
@@ -31,22 +29,8 @@ export default function SettingsPage() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [tutorConfig, setTutorConfig] = useState<{ enabled: boolean; primaryEnabled?: boolean; model: string | null; backupEnabled?: boolean; backupModel?: string | null } | null>(null);
-
   const savedName = user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? user?.user_metadata?.first_name ?? "";
   const name = nameOverride ?? (typeof savedName === "string" ? savedName : "");
-
-  useEffect(() => {
-    let active = true;
-    void getTutorConfiguration().then((result) => {
-      if (!active) return;
-      setTutorConfig({ enabled: result.enabled, model: result.model });
-      if (result.error) setError(result.error);
-    }).catch(() => {
-      if (active) setError("Could not read the AI tutor configuration.");
-    });
-    return () => { active = false; };
-  }, []);
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -142,7 +126,7 @@ export default function SettingsPage() {
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 pb-8">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-white">Settings</h1>
-          <p className="mt-1 text-sm text-zinc-400">Manage your profile, security, and AI tutor privacy.</p>
+          <p className="mt-1 text-sm text-zinc-400">Manage your profile and account security.</p>
         </div>
 
         {(message || error) && (
@@ -223,25 +207,6 @@ export default function SettingsPage() {
               </>
             )}
           </form>
-        </Card>
-
-        <Card>
-          <h2 className="text-lg font-semibold text-white">AI Tutor</h2>
-          <p className="mt-1 text-sm text-zinc-400">
-            {tutorConfig === null
-              ? "Checking the server configuration…"
-              : tutorConfig.enabled
-                ? tutorConfig.primaryEnabled
-                  ? `Tutor is available. DeepSeek (${tutorConfig.model}) is primary${tutorConfig.backupEnabled ? `; Gemini (${tutorConfig.backupModel}) is backup` : "; no backup is configured"}.`
-                  : `Gemini (${tutorConfig.backupModel}) is available as the only configured tutor provider.`
-                : "No AI provider is configured on this server yet."}
-          </p>
-          <p className="mt-3 text-sm leading-6 text-zinc-300">
-            When you use the tutor, the StudyForge server sends your question, recent text messages from that thread, its subject name, and any attached image to DeepSeek. If DeepSeek fails and Gemini is configured, that same tutor request is also sent to Gemini as a backup. Google’s free Gemini tier may use submitted content to improve Google products; review Google’s data terms before enabling it. Voice input is paused. Images are stored in a private Supabase bucket so they can appear in your tutoring history. Your email, profile, and other threads are not included. Provider keys stay on the server; students do not need to install or download either AI.
-          </p>
-          <Link href="/tutor" className={`${buttonVariants({ variant: "secondary" })} mt-4`}>
-            Open AI Tutor
-          </Link>
         </Card>
 
         <OtherPreferences user={user} />
