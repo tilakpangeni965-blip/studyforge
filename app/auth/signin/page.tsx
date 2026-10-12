@@ -80,6 +80,11 @@ export default function SignInPage() {
               className="w-full rounded-xl border border-white/8 bg-white/4 px-4 py-2.5 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="••••••••"
             />
+            <div className="mt-2 text-right">
+              <Link href="/auth/forgot-password" className="text-sm text-blue-400 hover:text-blue-300">
+                Forgot password?
+              </Link>
+            </div>
           </div>
 
           {error && (
