@@ -114,6 +114,15 @@ export function useSubjects() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: "Please sign in to delete a subject." };
 
+    const { data: fileRows, error: filesError } = await supabase
+      .from("subject_files")
+      .select("path")
+      .eq("subject_id", id)
+      .eq("user_id", user.id);
+    if (filesError && !/subject_files|schema cache|does not exist/i.test(filesError.message)) {
+      return { error: "Could not check the subject's files before deleting it." };
+    }
+
     const { data, error } = await supabase
       .from("subjects")
       .delete()
@@ -123,6 +132,15 @@ export function useSubjects() {
       .maybeSingle();
     if (error) return { error: error.message };
     if (!data) return { error: "Subject not found or you do not have access to it." };
+
+    const filePaths = (fileRows ?? []).flatMap((file) => typeof file.path === "string" ? [file.path] : []);
+    if (filePaths.length) {
+      const { error: storageError } = await supabase.storage.from("subject-files").remove(filePaths);
+      if (storageError) {
+        setSubjects((previous) => previous.filter((subject) => subject.id !== id));
+        return { success: true as const, warning: "The subject was deleted, but some stored files may need cleanup." };
+      }
+    }
 
     setSubjects((previous) => previous.filter((subject) => subject.id !== id));
     return { success: true as const };

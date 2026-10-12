@@ -9,6 +9,7 @@ import { Modal } from "@/components/ui/Modal"
 import { Button } from "@/components/ui/Button"
 import { useToast } from "@/components/ui/Toast"
 import { useSubjects } from "@/lib/hooks/useSubjects"
+import { SubjectFiles } from "@/components/subjects/SubjectFiles"
 
 export default function SubjectsPage() {
   const { subjects, loading, createSubject, deleteSubject } = useSubjects()
@@ -27,7 +28,7 @@ export default function SubjectsPage() {
     if (!subjectToDelete) return
     const result = await deleteSubject(subjectToDelete.id)
     if (result.error) toast({ title: "Subject could not be deleted", description: result.error, variant: "error" })
-    else toast({ title: "Subject deleted", description: "Notes linked to it are kept without a subject.", variant: "success" })
+    else toast({ title: "Subject deleted", description: result.warning ?? "Notes linked to it are kept without a subject.", variant: "success" })
     setSubjectToDelete(null)
   }
 
@@ -61,7 +62,7 @@ export default function SubjectsPage() {
             </div>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {subjects.map((subject) => (
               <Card
                 key={subject.id}
@@ -90,6 +91,7 @@ export default function SubjectsPage() {
                     label={`${subject.name} progress`}
                   />
                 </div>
+                <SubjectFiles subjectId={subject.id} userId={subject.user_id} />
                 <div className="mt-5 flex justify-end">
                   <button
                     type="button"
