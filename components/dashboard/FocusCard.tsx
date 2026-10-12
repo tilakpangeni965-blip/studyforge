@@ -61,14 +61,14 @@ export function FocusCard() {
   }
 
   return (
-    <Card className="relative overflow-hidden bg-gradient-to-br from-[#151528] to-[#121217]">
+    <Card className="relative overflow-hidden bg-gradient-to-br from-[#151528] to-[#121217] transition duration-300 hover:-translate-y-0.5 hover:border-white/15 hover:shadow-[0_18px_50px_rgba(99,102,241,0.16)] motion-reduce:transform-none">
       <div
         className="pointer-events-none absolute -top-16 -right-10 h-40 w-40 rounded-full bg-violet-500/15 blur-3xl"
         aria-hidden="true"
       />
       <p className="text-sm font-medium text-zinc-400">Focus session</p>
       <h2 className="mt-2 text-base font-semibold text-white">Pomodoro</h2>
-      <p className="mt-8 text-center font-mono text-5xl font-semibold tracking-tight text-white sm:text-6xl">
+      <p className="mt-8 text-center font-mono text-5xl font-semibold tracking-tight text-white transition duration-300 hover:scale-[1.03] hover:text-blue-100 sm:text-6xl motion-reduce:transform-none">
         {displayTime}
       </p>
       <p className="mt-3 text-center text-sm text-zinc-400">
@@ -79,7 +79,7 @@ export function FocusCard() {
           <button
             type="button"
             onClick={handlePause}
-            className="flex-1 inline-flex items-center justify-center rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/15"
+            className="inline-flex flex-1 items-center justify-center rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-white/15 hover:shadow-[0_8px_20px_rgba(255,255,255,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 active:translate-y-0 motion-reduce:transform-none"
           >
             Pause
           </button>
@@ -87,7 +87,7 @@ export function FocusCard() {
           <button
             type="button"
             onClick={handleStart}
-            className="flex-1 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(99,102,241,0.28)] transition-opacity hover:opacity-90"
+            className="inline-flex flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(99,102,241,0.28)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_10px_30px_rgba(99,102,241,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 active:translate-y-0 motion-reduce:transform-none"
           >
             {state === "paused" ? "Resume" : state === "complete" ? "Start another" : "Start"}
           </button>
@@ -95,7 +95,7 @@ export function FocusCard() {
         <button
           type="button"
           onClick={handleReset}
-          className="inline-flex items-center justify-center rounded-xl border border-white/8 bg-white/5 px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:bg-white/10"
+          className="inline-flex items-center justify-center rounded-xl border border-white/8 bg-white/5 px-4 py-3 text-sm font-semibold text-zinc-300 transition duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 active:translate-y-0 motion-reduce:transform-none"
         >
           Reset
         </button>
