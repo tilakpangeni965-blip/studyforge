@@ -11,6 +11,7 @@ import { getTutorConfiguration } from "@/app/tutor/actions";
 import { changeAccountEmail, changeAccountPassword } from "@/app/settings/security-actions";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyAuthError } from "@/lib/supabase/errors";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -60,7 +61,7 @@ export default function SettingsPage() {
     setSavingProfile(true);
     try {
       const { error: updateError } = await createClient().auth.updateUser({ data: { full_name: trimmedName } });
-      if (updateError) setError(updateError.message);
+      if (updateError) setError(friendlyAuthError(updateError, "update account"));
       else setMessage("Your profile name was updated.");
     } catch {
       setError("Could not update your profile. Please try again.");
@@ -86,7 +87,7 @@ export default function SettingsPage() {
       }
       setMessage(`A one-time verification code was sent to ${user?.email ?? "your account email"}.`);
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Could not send a verification code. Please try again.");
+      setError(friendlyAuthError(requestError, "update account"));
     } finally {
       setLoading(false);
     }
@@ -107,7 +108,7 @@ export default function SettingsPage() {
         setMessage("Email change started. Follow the confirmation email from Supabase to finish updating your address.");
       }
     } catch (changeError) {
-      setError(changeError instanceof Error ? changeError.message : "Could not change your email. Please try again.");
+      setError(friendlyAuthError(changeError, "update account"));
     } finally {
       setSavingEmail(false);
     }
@@ -130,7 +131,7 @@ export default function SettingsPage() {
         setMessage("Your password was changed.");
       }
     } catch (changeError) {
-      setError(changeError instanceof Error ? changeError.message : "Could not change your password. Please try again.");
+      setError(friendlyAuthError(changeError, "update account"));
     } finally {
       setSavingPassword(false);
     }

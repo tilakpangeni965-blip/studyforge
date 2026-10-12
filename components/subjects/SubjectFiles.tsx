@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyDatabaseError } from "@/lib/supabase/errors";
 
 type SubjectFile = {
   id: string;
@@ -103,10 +104,7 @@ export function SubjectFiles({ subjectId, userId }: { subjectId: string; userId:
       }
       await refresh();
     } catch (uploadFailure) {
-      const detail = uploadFailure instanceof Error ? uploadFailure.message : "";
-      setError(/bucket not found/i.test(detail)
-        ? "File uploads are temporarily unavailable. Please try again shortly."
-        : "That file could not be uploaded. Please try again.");
+      setError(friendlyDatabaseError(uploadFailure, "That file could not be uploaded. Check your connection and try again."));
     } finally {
       setUploading(false);
     }
@@ -127,7 +125,7 @@ export function SubjectFiles({ subjectId, userId }: { subjectId: string; userId:
     setError(null);
     const { error: rowError } = await supabase.from("subject_files").delete().eq("id", file.id).eq("user_id", userId);
     if (rowError) {
-      setError("Could not remove that file from your subject.");
+      setError(friendlyDatabaseError(rowError, "Could not remove that file from your subject. Please try again."));
       setBusyId(null);
       return;
     }

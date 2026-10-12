@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { Card } from "@/components/ui/Card"
+import { friendlyAuthError } from "@/lib/supabase/errors"
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("")
@@ -22,14 +23,19 @@ export default function ResetPasswordPage() {
     }
 
     setLoading(true)
-    const { error: updateError } = await createClient().auth.updateUser({ password })
-    if (updateError) {
-      setError(updateError.message)
+    try {
+      const { error: updateError } = await createClient().auth.updateUser({ password })
+      if (updateError) {
+        setError(friendlyAuthError(updateError, "reset password"))
+        setLoading(false)
+        return
+      }
+      setUpdated(true)
+    } catch (updateError) {
+      setError(friendlyAuthError(updateError, "reset password"))
       setLoading(false)
       return
     }
-
-    setUpdated(true)
     setLoading(false)
   }
 

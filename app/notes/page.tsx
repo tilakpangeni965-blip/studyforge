@@ -10,6 +10,7 @@ import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
 import { useSubjects } from "@/lib/hooks/useSubjects";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyDatabaseError } from "@/lib/supabase/errors";
 
 type Note = {
   id: string;
@@ -134,7 +135,7 @@ export default function NotesPage() {
 
     setSaving(false);
     if (result.error || !result.data) {
-      toast({ title: "Note could not be saved", description: result.error?.message ?? "No note was updated.", variant: "error" });
+      toast({ title: "Note could not be saved", description: result.error ? friendlyDatabaseError(result.error, "Please try saving your note again.") : "No note was updated. Refresh the page and try again.", variant: "error" });
       return;
     }
     setModalOpen(false);
@@ -146,7 +147,7 @@ export default function NotesPage() {
     setBusyNoteId(note.id);
     const { error } = await supabase.from("notes").update({ pinned: !note.pinned }).eq("id", note.id).eq("user_id", note.user_id);
     setBusyNoteId(null);
-    if (error) toast({ title: "Could not update note", description: error.message, variant: "error" });
+    if (error) toast({ title: "Could not update note", description: friendlyDatabaseError(error, "Please try updating your note again."), variant: "error" });
     else await refresh();
   }
 
@@ -157,7 +158,7 @@ export default function NotesPage() {
     const { error } = await supabase.from("notes").delete().eq("id", note.id).eq("user_id", note.user_id);
     setBusyNoteId(null);
     setDeletingNote(null);
-    if (error) toast({ title: "Note could not be deleted", description: error.message, variant: "error" });
+    if (error) toast({ title: "Note could not be deleted", description: friendlyDatabaseError(error, "Please try deleting your note again."), variant: "error" });
     else {
       toast({ title: "Note deleted", variant: "success" });
       await refresh();

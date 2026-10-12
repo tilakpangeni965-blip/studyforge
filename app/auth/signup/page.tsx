@@ -14,10 +14,12 @@ export default function SignUpPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    setMessage('')
     setLoading(true)
 
     const result = await signUp(email, password, fullName)
@@ -29,7 +31,7 @@ export default function SignUpPage() {
     }
 
     if (result.message) {
-      setError(result.message)
+      setMessage(result.message)
       setLoading(false)
       return
     }
@@ -48,7 +50,7 @@ export default function SignUpPage() {
             width={56}
             height={56}
             priority
-            className="mx-auto mb-4 h-14 w-14 rounded-xl bg-white object-cover shadow-[0_0_20px_rgba(99,102,241,0.18)]"
+            className="mx-auto mb-4 h-14 w-14 rounded-xl bg-white object-cover shadow-[0_0_20px_rgba(99,102,241,0.18)] transition duration-300 ease-out hover:scale-110 hover:rotate-3 hover:shadow-[0_0_28px_rgba(99,102,241,0.35)] motion-reduce:transform-none"
           />
           <h1 className="text-2xl font-semibold tracking-tight text-white">
             Create your account
@@ -69,7 +71,7 @@ export default function SignUpPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
-              className="w-full rounded-xl border border-white/8 bg-white/4 px-4 py-2.5 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border border-white/8 bg-white/4 px-4 py-2.5 text-white placeholder:text-zinc-500 transition-colors duration-200 hover:border-white/20 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="John Doe"
             />
           </div>
@@ -84,7 +86,7 @@ export default function SignUpPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border border-white/8 bg-white/4 px-4 py-2.5 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border border-white/8 bg-white/4 px-4 py-2.5 text-white placeholder:text-zinc-500 transition-colors duration-200 hover:border-white/20 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="you@example.com"
             />
           </div>
@@ -100,7 +102,7 @@ export default function SignUpPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full rounded-xl border border-white/8 bg-white/4 px-4 py-2.5 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border border-white/8 bg-white/4 px-4 py-2.5 text-white placeholder:text-zinc-500 transition-colors duration-200 hover:border-white/20 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="••••••••"
             />
           </div>
@@ -110,11 +112,16 @@ export default function SignUpPage() {
               {error}
             </div>
           )}
+          {message && (
+            <p role="status" className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-300">
+              {message}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(99,102,241,0.28)] transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(99,102,241,0.28)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_10px_30px_rgba(99,102,241,0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:translate-y-0 disabled:translate-y-0 disabled:opacity-50 motion-reduce:transform-none"
           >
             {loading ? 'Creating account...' : 'Sign up'}
           </button>
@@ -122,7 +129,7 @@ export default function SignUpPage() {
 
         <p className="mt-6 text-center text-sm text-zinc-400">
           Already have an account?{' '}
-          <Link href="/auth/signin" className="text-blue-400 hover:text-blue-300">
+          <Link href="/auth/signin" className="text-blue-400 transition-colors duration-200 hover:text-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
             Sign in
           </Link>
         </p>

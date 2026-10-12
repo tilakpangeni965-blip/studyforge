@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Field, Input, Select, Textarea } from "@/components/ui/Input";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyDatabaseError } from "@/lib/supabase/errors";
 
 type Deck = { id: string; title: string; subject_id: string | null; created_at: string; cardCount: number };
 type Flashcard = { id: string; deck_id: string; front: string; back: string; position: number; created_at: string };
 type Subject = { id: string; name: string };
 
-function flashcardError() {
-  return "Your flashcards are temporarily unavailable. Please try again shortly.";
+function flashcardError(error?: unknown) {
+  return friendlyDatabaseError(error, "Your flashcards are temporarily unavailable. Please try again shortly.");
 }
 
 export default function FlashcardsPage() {
@@ -38,7 +39,7 @@ export default function FlashcardsPage() {
       supabase.from("flashcards").select("deck_id").eq("user_id", id),
     ]);
     if (deckError || cardError) {
-      setError(flashcardError());
+      setError(flashcardError(deckError ?? cardError));
       setDecks([]);
       return [] as Deck[];
     }
@@ -58,7 +59,7 @@ export default function FlashcardsPage() {
       .order("position", { ascending: true })
       .order("created_at", { ascending: true });
     if (queryError) {
-      setError(flashcardError());
+      setError(flashcardError(queryError));
       setCards([]);
       return;
     }
@@ -85,6 +86,7 @@ export default function FlashcardsPage() {
       ]);
       if (!active) return;
       setSubjects((subjectResult.data ?? []) as Subject[]);
+      if (subjectResult.error) setError(flashcardError(subjectResult.error));
       if (!subjectResult.error && deckRows[0]) {
         setSelectedDeckId(deckRows[0].id);
         await loadCards(deckRows[0].id);
@@ -107,7 +109,7 @@ export default function FlashcardsPage() {
       .insert({ user_id: userId, title, subject_id: deckSubjectId || null })
       .select("id, title, subject_id, created_at")
       .single();
-    if (insertError || !data) setError(flashcardError());
+    if (insertError || !data) setError(insertError ? flashcardError(insertError) : flashcardError());
     else {
       setDecks((current) => [{ ...data, cardCount: 0 } as Deck, ...current]);
       setDeckTitle("");
@@ -137,7 +139,8 @@ export default function FlashcardsPage() {
       setDecks((current) => current.map((deck) => deck.id === selectedDeckId ? { ...deck, cardCount: deck.cardCount + 1 } : deck));
       setFront("");
       setBack("");
-      void supabase.from("flashcard_decks").update({ updated_at: new Date().toISOString() }).eq("id", selectedDeckId).eq("user_id", userId);
+      const { error: touchError } = await supabase.from("flashcard_decks").update({ updated_at: new Date().toISOString() }).eq("id", selectedDeckId).eq("user_id", userId);
+      if (touchError) console.error("Could not update flashcard deck activity:", touchError);
     }
     setSaving(false);
   }
@@ -145,7 +148,7 @@ export default function FlashcardsPage() {
   async function deleteCard(card: Flashcard) {
     if (!userId) return;
     const { error: deleteError } = await supabase.from("flashcards").delete().eq("id", card.id).eq("user_id", userId);
-    if (deleteError) setError("Could not delete that flashcard.");
+    if (deleteError) setError(flashcardError(deleteError));
     else {
       setCards((current) => current.filter((item) => item.id !== card.id));
       setDecks((current) => current.map((deck) => deck.id === card.deck_id ? { ...deck, cardCount: Math.max(0, deck.cardCount - 1) } : deck));
@@ -157,7 +160,7 @@ export default function FlashcardsPage() {
   async function deleteDeck(deck: Deck) {
     if (!userId || !window.confirm(`Delete “${deck.title}” and its ${deck.cardCount} card(s)?`)) return;
     const { error: deleteError } = await supabase.from("flashcard_decks").delete().eq("id", deck.id).eq("user_id", userId);
-    if (deleteError) setError("Could not delete that deck.");
+    if (deleteError) setError(flashcardError(deleteError));
     else {
       const next = decks.filter((item) => item.id !== deck.id);
       setDecks(next);

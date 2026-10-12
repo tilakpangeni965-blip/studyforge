@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { Card } from "@/components/ui/Card"
+import { friendlyAuthError } from "@/lib/supabase/errors"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -17,17 +18,21 @@ export default function ForgotPasswordPage() {
     setLoading(true)
     setError("")
 
-    const { error: requestError } = await createClient().auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-    })
-
-    if (requestError) {
-      setError(requestError.message)
+    try {
+      const { error: requestError } = await createClient().auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      })
+      if (requestError) {
+        setError(friendlyAuthError(requestError, "reset password"))
+        setLoading(false)
+        return
+      }
+      setSent(true)
+    } catch (requestError) {
+      setError(friendlyAuthError(requestError, "reset password"))
       setLoading(false)
       return
     }
-
-    setSent(true)
     setLoading(false)
   }
 
@@ -58,7 +63,7 @@ export default function ForgotPasswordPage() {
         )}
 
         <p className="mt-6 text-center text-sm text-zinc-400">
-          <Link href="/auth/signin" className="text-blue-400 hover:text-blue-300">Back to sign in</Link>
+        <Link href="/auth/signin" className="text-blue-400 transition-colors duration-200 hover:text-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">Back to sign in</Link>
         </p>
       </Card>
     </div>

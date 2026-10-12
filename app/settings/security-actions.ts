@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { friendlyAuthError } from "@/lib/supabase/errors";
 
 type CredentialUpdate = { email: string; nonce: string } | { password: string; current_password: string; nonce: string };
 
@@ -11,7 +12,7 @@ async function updateCredential(update: CredentialUpdate) {
     if (userError || !user) return { error: "Please sign in again before changing account security." };
 
     const { error } = await supabase.auth.updateUser(update);
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyAuthError(error, "update account") };
     return { success: true };
   } catch {
     return { error: "Could not update your account. Please try again." };

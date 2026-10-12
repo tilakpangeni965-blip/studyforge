@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { friendlyDatabaseError } from "@/lib/supabase/errors";
 
 export type Subject = {
   id: string;
@@ -86,7 +87,7 @@ export function useSubjects() {
       .insert({ user_id: user.id, name: safeName, icon, color, progress: 0 })
       .select("id, user_id, name, icon, color, progress, created_at, updated_at")
       .single();
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyDatabaseError(error, "Could not create that subject. Please try again.") };
 
     setSubjects((previous) => [data as Subject, ...previous.filter((subject) => subject.id !== data.id)]);
     return { data: data as Subject };
@@ -103,7 +104,7 @@ export function useSubjects() {
       .eq("user_id", user.id)
       .select("id, user_id, name, icon, color, progress, created_at, updated_at")
       .maybeSingle();
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyDatabaseError(error, "Could not update that subject. Please try again.") };
     if (!data) return { error: "Subject not found or you do not have access to it." };
 
     setSubjects((previous) => previous.map((subject) => subject.id === id ? data as Subject : subject));
@@ -130,7 +131,7 @@ export function useSubjects() {
       .eq("user_id", user.id)
       .select("id")
       .maybeSingle();
-    if (error) return { error: error.message };
+    if (error) return { error: friendlyDatabaseError(error, "Could not delete that subject. Please try again.") };
     if (!data) return { error: "Subject not found or you do not have access to it." };
 
     const filePaths = (fileRows ?? []).flatMap((file) => typeof file.path === "string" ? [file.path] : []);
