@@ -36,4 +36,4 @@ npm run lint
 npm run typecheck
 npm run build
 ```
-Just a small devloper working with ai agents to do something
+## Just a small devloper working with ai agents to do something
