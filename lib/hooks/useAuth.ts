@@ -10,22 +10,31 @@ export function useAuth() {
   const supabase = createClient()
 
   useEffect(() => {
+    let mounted = true
+
     // Get initial session
     supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
-      setLoading(false)
+      if (mounted) {
+        setUser(user)
+        setLoading(false)
+      }
     })
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
+      if (mounted) {
+        setUser(session?.user ?? null)
+        setLoading(false)
+      }
     })
 
-    return () => subscription.unsubscribe()
-  }, [supabase])
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
+  }, [supabase.auth])
 
   const signOut = async () => {
     await supabase.auth.signOut()

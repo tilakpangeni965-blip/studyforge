@@ -1,44 +1,13 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-"use client"
+"use client";
 
-import { useEffect, useState } from 'react'
+import Link from "next/link";
 import { Card } from "@/components/ui/Card"
 import { ProgressBar } from "@/components/ui/ProgressBar"
-import { createClient } from '@/lib/supabase/client'
-
-type Subject = {
-  id: string
-  name: string
-  icon: string
-  color: string
-  progress: number
-}
+import { useStudentSubjects } from "@/lib/hooks/useStudentSubjects";
 
 export function ContinueStudying() {
-  const [subjects, setSubjects] = useState<Subject[]>([])
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
-
-  useEffect(() => {
-    async function fetchSubjects() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data } = await supabase
-        .from('subjects')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('updated_at', { ascending: false })
-        .limit(4)
-
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSubjects(data || [])
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLoading(false)
-    }
-
-    fetchSubjects()
-  }, [supabase])
+  const { subjects: allSubjects, loading } = useStudentSubjects();
+  const subjects = allSubjects.slice(0, 4);
 
   if (loading) {
     return (
@@ -125,12 +94,12 @@ export function ContinueStudying() {
                 label={`${subject.name} progress`}
               />
             </div>
-            <button
-              type="button"
+            <Link
+              href="/notes"
               className="mt-5 inline-flex w-full items-center justify-center rounded-xl border border-white/8 bg-white/5 px-4 py-2.5 text-sm font-medium text-zinc-100 transition-colors hover:bg-white/10"
             >
-              Continue
-            </button>
+              Review notes
+            </Link>
           </Card>
         ))}
       </div>

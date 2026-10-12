@@ -1,71 +1,43 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-"use client"
+"use client";
 
-import { useEffect, useState } from 'react'
 import { Stat } from "@/components/ui/Stat"
-import { createClient } from '@/lib/supabase/client'
+import { useStudentSubjects } from "@/lib/hooks/useStudentSubjects";
 
 export function StatsGrid() {
-  const [subjectCount, setSubjectCount] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
-
-  useEffect(() => {
-    let mounted = true
-    async function fetchStats() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        if (mounted) setLoading(false)
-        return
-      }
-
-      const { count } = await supabase
-        .from('subjects')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-
-      if (mounted) {
-        setSubjectCount(count || 0)
-        setLoading(false)
-      }
-    }
-
-    fetchStats()
-    return () => {
-      mounted = false
-    }
-  }, [])
+  const { subjects, loading } = useStudentSubjects();
+  const averageProgress = subjects.length
+    ? Math.round(subjects.reduce((total, subject) => total + subject.progress, 0) / subjects.length)
+    : 0;
 
   const stats = [
     {
-      {
-        id: "subjects",
-        icon: "📚",
-        label: "Subjects",
-        value: loading ? "..." : subjectCount.toString(),
-        hint: "Total subjects",
-      },
-      {
-        id: "streak",
-        icon: "🔥",
-        label: "Current Streak",
-        value: "—",
-        hint: "Not connected yet",
-      },
-      {
-        id: "focus",
-        icon: "⏱",
-        label: "Focus Time",
-        value: "—",
-        hint: "Not connected yet",
-      },
-      {
-        id: "goal",
-        icon: "🎯",
-        label: "Weekly Goal",
-        value: "—",
-        hint: "Not connected yet",
-      },
+      id: "subjects",
+      icon: "📚",
+      label: "Subjects",
+      value: String(subjects.length),
+      hint: "Your saved subjects",
+    },
+    {
+      id: "progress",
+      icon: "📈",
+      label: "Average progress",
+      value: `${averageProgress}%`,
+      hint: subjects.length ? `Across ${subjects.length} subject${subjects.length === 1 ? "" : "s"}` : "Add a subject to start",
+    },
+    {
+      id: "focus",
+      icon: "⏱",
+      label: "Focus time",
+      value: "Not tracked",
+      hint: "No saved focus sessions yet",
+    },
+    {
+      id: "streak",
+      icon: "🔥",
+      label: "Study streak",
+      value: "Not tracked",
+      hint: "Study activity is not recorded yet",
+    },
   ]
 
   return (
@@ -81,7 +53,7 @@ export function StatsGrid() {
             value={stat.value}
             hint={stat.hint}
             icon={stat.icon}
-            loading={loading && stat.id === "subjects"}
+            loading={loading && (stat.id === "subjects" || stat.id === "progress")}
           />
         ))}
       </div>

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "katex/dist/katex.min.css";
 
 /* ---------------------------------------------------------------------------
    Design tokens — the single source of truth for colour, elevation and motion.
@@ -50,6 +51,33 @@
   --sf-ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+:root[data-theme="light"] {
+  color-scheme: light;
+  --sf-canvas: #f4f6fb;
+  --sf-surface: #ffffff;
+  --sf-surface-raised: #ffffff;
+  --sf-surface-hover: #eef1f7;
+  --sf-overlay: rgba(15, 23, 42, 0.38);
+  --sf-hairline: rgba(15, 23, 42, 0.12);
+  --sf-hairline-strong: rgba(15, 23, 42, 0.2);
+  --sf-ink: #172033;
+  --sf-ink-muted: #526078;
+  --sf-ink-subtle: #68758b;
+  --sf-accent: #4f46e5;
+  --sf-accent-hover: #4338ca;
+  --sf-accent-violet: #7c3aed;
+  --sf-accent-soft: rgba(79, 70, 229, 0.12);
+  --sf-accent-contrast: #ffffff;
+  --sf-success: #047857;
+  --sf-success-soft: rgba(5, 150, 105, 0.12);
+  --sf-warning: #a16207;
+  --sf-warning-soft: rgba(202, 138, 4, 0.12);
+  --sf-danger: #b91c1c;
+  --sf-danger-soft: rgba(220, 38, 38, 0.1);
+  --sf-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --sf-shadow-pop: 0 18px 45px rgba(15, 23, 42, 0.16);
+}
+
 /* Expose the tokens as Tailwind utilities: bg-surface, text-ink-muted, … */
 @theme inline {
   --color-canvas: var(--sf-canvas);
@@ -94,6 +122,29 @@ body {
   background: var(--sf-canvas);
   color: var(--sf-ink);
 }
+
+/* Keep the existing dark utility based screens readable in the light theme. */
+[data-theme="light"] [class~="text-white"] { color: #172033 !important; }
+[data-theme="light"] [class~="text-zinc-100"],
+[data-theme="light"] [class~="text-zinc-200"] { color: #263248 !important; }
+[data-theme="light"] [class~="text-zinc-300"] { color: #3d4a60 !important; }
+[data-theme="light"] [class~="text-zinc-400"],
+[data-theme="light"] [class~="text-zinc-500"] { color: #5c6a80 !important; }
+[data-theme="light"] [class~="text-red-400"] { color: #b91c1c !important; }
+[data-theme="light"] [class~="text-emerald-400"] { color: #047857 !important; }
+[data-theme="light"] [class~="text-emerald-300"] { color: #047857 !important; }
+[data-theme="light"] [class~="bg-black/20"] { background-color: rgba(15, 23, 42, 0.04) !important; }
+[data-theme="light"] [class~="bg-white/4"],
+[data-theme="light"] [class~="bg-white/5"],
+[data-theme="light"] [class~="bg-white/6"],
+[data-theme="light"] [class~="bg-white/8"],
+[data-theme="light"] [class~="bg-white/10"],
+[data-theme="light"] [class~="bg-white/15"] { background-color: rgba(15, 23, 42, 0.045) !important; }
+[data-theme="light"] [class~="border-white/6"],
+[data-theme="light"] [class~="border-white/8"],
+[data-theme="light"] [class~="border-white/10"] { border-color: rgba(15, 23, 42, 0.12) !important; }
+[data-theme="light"] button[class*="bg-gradient-to-"],
+[data-theme="light"] a[class*="bg-gradient-to-"] { color: #ffffff !important; }
 
 body {
   min-height: 100%;
