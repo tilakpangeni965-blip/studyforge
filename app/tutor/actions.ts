@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { checkTutorRateLimit } from "@/lib/tutor/rate-limit";
 import { generateTutorReply } from "@/lib/tutor/assistant";
 import { getDeepSeekModel } from "@/lib/ai/deepseek";
+import { getGeminiModel } from "@/lib/ai/gemini";
 import type { TutorAttachmentInput, TutorConversation, TutorMessage, TutorSession } from "@/types/tutor";
 
 const MAX_HISTORY_MESSAGES = 60;
@@ -151,8 +152,11 @@ export async function getTutorConfiguration() {
   }
 
   return {
-    enabled: Boolean(process.env.DEEPSEEK_API_KEY),
+    enabled: Boolean(process.env.DEEPSEEK_API_KEY || process.env.GEMINI_API_KEY),
+    primaryEnabled: Boolean(process.env.DEEPSEEK_API_KEY),
     model: getDeepSeekModel(),
+    backupEnabled: Boolean(process.env.GEMINI_API_KEY),
+    backupModel: process.env.GEMINI_API_KEY ? getGeminiModel() : null,
     error: undefined,
   };
 }

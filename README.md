@@ -1,6 +1,6 @@
 # StudyForge
 
-StudyForge is a student study workspace with Supabase-backed subjects and notes, a Pomodoro timer, and an AI tutor powered by the hosted DeepSeek API.
+StudyForge is a student study workspace with Supabase-backed subjects and notes, a Pomodoro timer, and an AI tutor powered primarily by the hosted DeepSeek API, with an optional Gemini fallback.
 
 ## Local setup
 
@@ -14,7 +14,7 @@ Migrations `0001`–`0003` create notes and tutor data and enable subject/note r
 
 ## AI tutor data use
 
-Tutor requests run on the server, so students do not download or run DeepSeek. DeepSeek receives the student's current question, up to 30 earlier messages from that same thread, the selected subject name, and an attached image when provided. The student's email, profile, and other threads are not included. The API key remains on the server. The default model is `deepseek-flash`; set `DEEPSEEK_MODEL` on the server to choose another supported model. Image input is supported; voice input is paused.
+Tutor requests run on the server, so students do not download or run either model. DeepSeek receives the student's current question, up to 30 earlier messages from that same thread, the selected subject name, and an attached image when provided. If a DeepSeek tutor request fails and `GEMINI_API_KEY` is configured, the same request is sent to Gemini as a fallback. Gemini is not used for quiz generation. The student's email, profile, and other threads are not included. API keys remain on the server. The default models are `deepseek-flash` and `gemini-3.1-flash-lite`; set `DEEPSEEK_MODEL` or `GEMINI_MODEL` on the server to choose another supported model. Image input is supported; voice input is paused. Google may use content submitted on Gemini's free tier to improve Google products; review Google's current data terms before enabling the fallback.
 
 The tutor is limited to five requests per student per minute using the database procedure from migration `0002`. If that procedure has not been applied or is unavailable, the app uses a per-process fallback, which is not a shared limit across server instances.
 
