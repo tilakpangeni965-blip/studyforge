@@ -52,9 +52,7 @@ export function SubjectFiles({ subjectId, userId }: { subjectId: string; userId:
       .eq("subject_id", subjectId)
       .order("created_at", { ascending: false });
     if (queryError) {
-      setError(/subject_files|schema cache|does not exist/i.test(queryError.message)
-        ? "Apply Supabase migration 0008_subject_files.sql to enable subject files."
-        : "Could not load subject files.");
+      setError("Subject files are temporarily unavailable. Please try again shortly.");
     } else {
       setFiles((data ?? []) as SubjectFile[]);
       setError(null);
@@ -107,8 +105,8 @@ export function SubjectFiles({ subjectId, userId }: { subjectId: string; userId:
     } catch (uploadFailure) {
       const detail = uploadFailure instanceof Error ? uploadFailure.message : "";
       setError(/bucket not found/i.test(detail)
-        ? "Apply Supabase migration 0008_subject_files.sql to create private file storage."
-        : "That file could not be uploaded. Check your connection and try again.");
+        ? "File uploads are temporarily unavailable. Please try again shortly."
+        : "That file could not be uploaded. Please try again.");
     } finally {
       setUploading(false);
     }

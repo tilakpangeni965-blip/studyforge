@@ -174,7 +174,7 @@ function useTutor() {
         }
         const detail = sendError instanceof Error ? sendError.message : "";
         setError(/bucket|storage|row.level|policy/i.test(detail)
-          ? "Tutor attachments are not set up in Supabase yet. Apply the tutor media migration, then try again."
+          ? "Image attachments are temporarily unavailable. Please try again shortly."
           : "Could not send your question. Please try again.");
         return false;
       } finally {

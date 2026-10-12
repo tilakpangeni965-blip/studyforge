@@ -11,10 +11,8 @@ type Deck = { id: string; title: string; subject_id: string | null; created_at: 
 type Flashcard = { id: string; deck_id: string; front: string; back: string; position: number; created_at: string };
 type Subject = { id: string; name: string };
 
-function migrationHint(message: string) {
-  return /flashcard_decks|flashcards|schema cache|does not exist/i.test(message)
-    ? "Apply Supabase migration 0009_flashcards.sql, then reload this page."
-    : "Please try again. If this continues, check your connection and account access.";
+function flashcardError() {
+  return "Your flashcards are temporarily unavailable. Please try again shortly.";
 }
 
 export default function FlashcardsPage() {
@@ -40,8 +38,7 @@ export default function FlashcardsPage() {
       supabase.from("flashcards").select("deck_id").eq("user_id", id),
     ]);
     if (deckError || cardError) {
-      const message = deckError?.message ?? cardError?.message ?? "";
-      setError(migrationHint(message));
+      setError(flashcardError());
       setDecks([]);
       return [] as Deck[];
     }
@@ -61,7 +58,7 @@ export default function FlashcardsPage() {
       .order("position", { ascending: true })
       .order("created_at", { ascending: true });
     if (queryError) {
-      setError(migrationHint(queryError.message));
+      setError(flashcardError());
       setCards([]);
       return;
     }
@@ -110,7 +107,7 @@ export default function FlashcardsPage() {
       .insert({ user_id: userId, title, subject_id: deckSubjectId || null })
       .select("id, title, subject_id, created_at")
       .single();
-    if (insertError || !data) setError(migrationHint(insertError?.message ?? ""));
+    if (insertError || !data) setError(flashcardError());
     else {
       setDecks((current) => [{ ...data, cardCount: 0 } as Deck, ...current]);
       setDeckTitle("");
@@ -134,7 +131,7 @@ export default function FlashcardsPage() {
       .insert({ user_id: userId, deck_id: selectedDeckId, front: cleanFront, back: cleanBack, position: cards.length })
       .select("id, deck_id, front, back, position, created_at")
       .single();
-    if (insertError || !data) setError(migrationHint(insertError?.message ?? ""));
+    if (insertError || !data) setError(flashcardError());
     else {
       setCards((current) => [...current, data as Flashcard]);
       setDecks((current) => current.map((deck) => deck.id === selectedDeckId ? { ...deck, cardCount: deck.cardCount + 1 } : deck));

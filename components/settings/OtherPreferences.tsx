@@ -159,7 +159,7 @@ export function OtherPreferences({ user }: { user: User | null }) {
       anchor.click();
       window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
       setExportMessage(unavailableSections.length
-        ? `Export downloaded. These sections could not be read: ${unavailableSections.join(", " )}. Apply the required database migrations if you need them.`
+        ? "Your export was downloaded, but some study data was unavailable."
         : "Your account data export has been downloaded.");
     } catch {
       setExportError("Could not export account data. Please try again.");

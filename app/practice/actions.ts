@@ -32,12 +32,6 @@ async function getSignedInClient() {
   return { supabase, user, error: null };
 }
 
-function messageOf(error: unknown) {
-  if (error instanceof Error) return error.message;
-  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") return error.message;
-  return "";
-}
-
 function viewQuestions(value: unknown) {
   if (!Array.isArray(value)) return [];
   return value.flatMap((item) => {
@@ -93,11 +87,8 @@ export async function getPracticeDashboard() {
     return { error: null, subjects, quizzes };
   } catch (error) {
     console.error("[practice] load failed", error);
-    const detail = messageOf(error);
     return {
-      error: /practice_quiz|schema cache|function.*practice/i.test(detail)
-        ? "Practice quizzes need database migration 0005. Apply it in the Supabase SQL Editor, then reload this page."
-        : "Could not load practice quizzes. Please try again.",
+      error: "Could not load practice quizzes. Please try again shortly.",
       subjects: [],
       quizzes: [],
     };
@@ -166,13 +157,8 @@ export async function createPracticeQuiz(input: {
     return { error: null, quiz: responseQuiz };
   } catch (error) {
     console.error("[practice] quiz generation failed", error);
-    const detail = messageOf(error);
     return {
-      error: /practice_quiz|schema cache|function.*practice/i.test(detail)
-        ? "Practice quizzes need database migration 0005. Apply it in the Supabase SQL Editor, then try again."
-        : /DEEPSEEK_API_KEY/.test(detail)
-          ? "DeepSeek quiz generation is not configured on this server yet. Add DEEPSEEK_API_KEY to the server environment, then restart the app."
-          : "Could not generate that quiz. Please try again.",
+      error: "Could not generate that quiz. Please try again shortly.",
       quiz: null,
     };
   }

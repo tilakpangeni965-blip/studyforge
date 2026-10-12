@@ -14,16 +14,6 @@ const MAX_ATTACHMENT_SIZE = 8 * 1024 * 1024;
 const ATTACHMENT_BUCKET = "tutor-attachments";
 const ALLOWED_ATTACHMENT_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-function errorMessage(error: unknown) {
-  if (error instanceof Error) return error.message;
-  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") return error.message;
-  return "";
-}
-
-function mediaMigrationMissing(error: unknown) {
-  return /column.*attachments|attachments.*column|bucket.*not found/i.test(errorMessage(error));
-}
-
 async function makeSupabaseClient() {
   const cookieStore = await cookies();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -181,9 +171,7 @@ export async function listTutorMessages(conversationId: string) {
     return {
       session,
       messages: [],
-      error: mediaMigrationMissing(error)
-        ? "The tutor media database migration has not been applied yet. Apply migration 0004, then reload the conversation."
-        : "Could not load conversation messages.",
+      error: "Could not load conversation messages. Please try again.",
     };
   }
 }
@@ -305,9 +293,7 @@ export async function sendTutorMessage(conversationId: string, content: string, 
     return {
       session,
       message: null,
-      error: mediaMigrationMissing(error)
-        ? "The tutor media database migration has not been applied yet. Apply migration 0004, then try again."
-        : "The tutor could not answer right now. Check the AI and database configuration, then try again.",
+      error: "The tutor could not answer right now. Please try again shortly.",
     };
   }
 }

@@ -58,7 +58,7 @@ export default function NotesPage() {
     if (!active.current) return;
     if (error) {
       console.error("Could not load notes:", error);
-      toast({ title: "Notes could not be loaded", description: "Review and apply supabase/migrations/0001_notes.sql, then refresh.", variant: "error" });
+      toast({ title: "Notes could not be loaded", description: "Please try again shortly.", variant: "error" });
     } else {
       setNotes((data ?? []) as Note[]);
     }
