@@ -5,26 +5,31 @@ import { AppShell } from "@/components/layout/AppShell"
 import { Card } from "@/components/ui/Card"
 import { ProgressBar } from "@/components/ui/ProgressBar"
 import { CreateSubjectModal } from "@/components/subjects/CreateSubjectModal"
+import { Modal } from "@/components/ui/Modal"
+import { Button } from "@/components/ui/Button"
+import { useToast } from "@/components/ui/Toast"
 import { useSubjects } from "@/lib/hooks/useSubjects"
+import { SubjectFiles } from "@/components/subjects/SubjectFiles"
 
 export default function SubjectsPage() {
   const { subjects, loading, createSubject, deleteSubject } = useSubjects()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [subjectToDelete, setSubjectToDelete] = useState<{ id: string; name: string } | null>(null)
+  const { toast } = useToast()
 
   async function handleCreate(name: string, icon: string, color: string) {
     const result = await createSubject(name, icon, color)
-    if (result.error) {
-      alert(result.error)
-    }
+    if (result.error) toast({ title: "Subject could not be created", description: result.error, variant: "error" })
+    else toast({ title: "Subject created", variant: "success" })
+    return !result.error
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this subject?')) return
-
-    const result = await deleteSubject(id)
-    if (result.error) {
-      alert(result.error)
-    }
+  async function handleDelete() {
+    if (!subjectToDelete) return
+    const result = await deleteSubject(subjectToDelete.id)
+    if (result.error) toast({ title: "Subject could not be deleted", description: result.error, variant: "error" })
+    else toast({ title: "Subject deleted", description: result.warning ?? "Notes linked to it are kept without a subject.", variant: "success" })
+    setSubjectToDelete(null)
   }
 
   return (
@@ -57,7 +62,7 @@ export default function SubjectsPage() {
             </div>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {subjects.map((subject) => (
               <Card
                 key={subject.id}
@@ -86,16 +91,11 @@ export default function SubjectsPage() {
                     label={`${subject.name} progress`}
                   />
                 </div>
-                <div className="mt-5 flex gap-2">
+                <SubjectFiles subjectId={subject.id} userId={subject.user_id} />
+                <div className="mt-5 flex justify-end">
                   <button
                     type="button"
-                    className="flex-1 inline-flex items-center justify-center rounded-xl border border-white/8 bg-white/5 px-4 py-2.5 text-sm font-medium text-zinc-100 transition-colors hover:bg-white/10"
-                  >
-                    View
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(subject.id)}
+                    onClick={() => setSubjectToDelete({ id: subject.id, name: subject.name })}
                     className="inline-flex items-center justify-center rounded-xl border border-red-500/20 bg-red-500/5 px-3 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
                   >
                     Delete
@@ -111,6 +111,20 @@ export default function SubjectsPage() {
           onClose={() => setIsModalOpen(false)}
           onCreate={handleCreate}
         />
+        <Modal
+          isOpen={Boolean(subjectToDelete)}
+          onClose={() => setSubjectToDelete(null)}
+          title="Delete this subject?"
+          description="Any linked notes are kept, but their subject link will be removed."
+          footer={
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setSubjectToDelete(null)}>Cancel</Button>
+              <Button variant="danger" onClick={() => void handleDelete()}>Delete subject</Button>
+            </div>
+          }
+        >
+          <p className="text-sm text-zinc-300">{subjectToDelete?.name}</p>
+        </Modal>
       </div>
     </AppShell>
   )

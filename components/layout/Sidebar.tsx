@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { mainNav, settingsNav } from "@/lib/dashboard-data";
@@ -34,7 +35,7 @@ function NavLink({
         collapsed ? "justify-center" : ""
       } ${
         active
-          ? "bg-white/8 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]"
+          ? "bg-accent-soft text-ink shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]"
           : "text-zinc-400 hover:bg-white/5 hover:text-zinc-100"
       }`}
     >
@@ -54,6 +55,9 @@ export function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
   const { user, signOut } = useAuth();
+  const metadataName = [user?.user_metadata?.full_name, user?.user_metadata?.name, user?.user_metadata?.first_name, user?.user_metadata?.given_name]
+    .find((value) => typeof value === "string" && value.trim());
+  const displayName = typeof metadataName === "string" ? metadataName.trim() : user?.email?.split("@")[0] || "Student";
 
   return (
     <div className="flex h-full flex-col">
@@ -62,12 +66,14 @@ export function Sidebar({
           collapsed ? "justify-center" : ""
         }`}
       >
-        <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 text-sm font-semibold text-white shadow-[0_0_20px_rgba(99,102,241,0.28)]"
-          aria-hidden="true"
-        >
-          S
-        </div>
+        <Image
+          src="/icon.png"
+          alt=""
+          width={40}
+          height={40}
+          priority
+          className="h-10 w-10 shrink-0 rounded-xl bg-white object-cover shadow-[0_0_20px_rgba(99,102,241,0.18)]"
+        />
         {!collapsed ? (
           <div className="min-w-0">
             <p className="truncate text-base font-semibold tracking-tight text-white">
@@ -112,18 +118,18 @@ export function Sidebar({
               }`}
             >
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/30 to-violet-500/30 text-xs font-semibold text-zinc-100 ring-1 ring-white/10">
-                {user.user_metadata.full_name?.charAt(0).toUpperCase() || 'U'}
+                {displayName.charAt(0).toUpperCase()}
               </div>
               {!collapsed ? (
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-zinc-100">
-                    {user.user_metadata.full_name || 'User'}
+                    {displayName}
                   </p>
                   <p className="truncate text-xs text-zinc-500">Student</p>
                 </div>
               ) : (
                 <span className="sr-only">
-                  {user.user_metadata.full_name || 'User'}, Student
+                  {displayName}, Student
                 </span>
               )}
             </div>

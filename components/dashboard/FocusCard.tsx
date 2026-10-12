@@ -2,44 +2,62 @@
 
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
+import { useToast } from "@/components/ui/Toast";
 
-type TimerState = "idle" | "running" | "paused";
+type TimerState = "idle" | "running" | "paused" | "complete";
+const SESSION_SECONDS = 25 * 60;
 
 export function FocusCard() {
-  const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(SESSION_SECONDS);
   const [state, setState] = useState<TimerState>("idle");
+  const [endsAt, setEndsAt] = useState<number | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (state !== "running") return;
+    if (state !== "running" || endsAt === null) return;
 
     const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          setState("idle");
-          return 25 * 60;
-        }
-        return prev - 1;
-      });
+      const remaining = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining === 0) {
+        setState("complete");
+        setEndsAt(null);
+        toast({ title: "Focus session complete", description: "Take a short break before your next session.", variant: "success" });
+      }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [state]);
+  }, [state, endsAt, toast]);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
   const displayTime = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
   function handleStart() {
+    const remaining = state === "idle" || state === "complete" ? SESSION_SECONDS : timeLeft;
+    setTimeLeft(remaining);
+    setEndsAt(Date.now() + remaining * 1000);
     setState("running");
   }
 
   function handlePause() {
+    if (endsAt !== null) {
+      const remaining = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      setEndsAt(null);
+      if (remaining === 0) {
+        setState("complete");
+        toast({ title: "Focus session complete", description: "Take a short break before your next session.", variant: "success" });
+        return;
+      }
+    }
     setState("paused");
   }
 
   function handleReset() {
     setState("idle");
-    setTimeLeft(25 * 60);
+    setEndsAt(null);
+    setTimeLeft(SESSION_SECONDS);
   }
 
   return (
@@ -54,7 +72,7 @@ export function FocusCard() {
         {displayTime}
       </p>
       <p className="mt-3 text-center text-sm text-zinc-400">
-        {state === "running" ? "Stay focused!" : state === "paused" ? "Paused" : "One deep work block"}
+        {state === "running" ? "Stay focused!" : state === "paused" ? "Paused" : state === "complete" ? "Session complete — take a short break" : "One deep work block"}
       </p>
       <div className="mt-8 flex gap-2">
         {state === "running" ? (
@@ -71,7 +89,7 @@ export function FocusCard() {
             onClick={handleStart}
             className="flex-1 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(99,102,241,0.28)] transition-opacity hover:opacity-90"
           >
-            {state === "paused" ? "Resume" : "Start"}
+            {state === "paused" ? "Resume" : state === "complete" ? "Start another" : "Start"}
           </button>
         )}
         <button

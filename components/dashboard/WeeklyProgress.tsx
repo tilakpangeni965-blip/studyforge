@@ -1,34 +1,14 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-"use client"
+"use client";
 
-import { useEffect, useState } from 'react'
 import { Card } from "@/components/ui/Card"
 import { ProgressBar } from "@/components/ui/ProgressBar"
-import { createClient } from '@/lib/supabase/client'
+import { useStudentSubjects } from "@/lib/hooks/useStudentSubjects";
 
 export function WeeklyProgress() {
-  const [subjectCount, setSubjectCount] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
-
-  useEffect(() => {
-    async function fetchData() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { count } = await supabase
-        .from('subjects')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSubjectCount(count || 0)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLoading(false)
-    }
-
-    fetchData()
-  }, [supabase])
+  const { subjects, loading } = useStudentSubjects();
+  const averageProgress = subjects.length
+    ? Math.round(subjects.reduce((total, subject) => total + subject.progress, 0) / subjects.length)
+    : 0;
 
   return (
     <Card aria-labelledby="weekly-progress-heading" className="relative overflow-hidden bg-gradient-to-br from-[#151528] to-[#121217]">
@@ -44,24 +24,24 @@ export function WeeklyProgress() {
           Your progress
         </h2>
         <p className="mt-1 text-sm text-zinc-400">
-          {loading ? 'Loading...' : subjectCount > 0 ? `You have ${subjectCount} subject${subjectCount > 1 ? 's' : ''}` : "Add subjects to start tracking"}
+          {loading ? 'Loading...' : subjects.length ? `Average progress across ${subjects.length} subject${subjects.length === 1 ? '' : 's'}` : "Add subjects to start tracking"}
         </p>
 
         <div className="mt-8">
           <p className="text-6xl font-semibold tracking-tight text-white">
-            {loading ? '...' : subjectCount > 0 ? subjectCount.toString() : '0'}
+            {loading ? '...' : `${averageProgress}%`}
           </p>
         </div>
 
         <div className="mt-6">
           <ProgressBar
-            value={loading ? 0 : Math.min(100, subjectCount * 25)}
-            label="Weekly study progress"
+            value={loading ? 0 : averageProgress}
+            label="Average subject progress"
           />
         </div>
 
         <p className="mt-4 text-sm text-zinc-400">
-          {loading ? 'Loading...' : subjectCount > 0 ? 'Start studying to track your progress' : 'Create your first subject to begin'}
+          {loading ? 'Loading...' : subjects.length ? 'Updated from your saved subject progress' : 'Create your first subject to begin'}
         </p>
       </div>
     </Card>

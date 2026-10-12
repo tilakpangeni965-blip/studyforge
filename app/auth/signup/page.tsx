@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { signUp } from '@/lib/supabase/auth'
@@ -41,9 +42,14 @@ export default function SignUpPage() {
     <div className="flex min-h-dvh items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 text-xl font-semibold text-white shadow-[0_0_20px_rgba(99,102,241,0.28)]">
-            S
-          </div>
+          <Image
+            src="/icon.png"
+            alt="StudyForge logo"
+            width={56}
+            height={56}
+            priority
+            className="mx-auto mb-4 h-14 w-14 rounded-xl bg-white object-cover shadow-[0_0_20px_rgba(99,102,241,0.18)]"
+          />
           <h1 className="text-2xl font-semibold tracking-tight text-white">
             Create your account
           </h1>
